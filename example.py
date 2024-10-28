@@ -52,6 +52,6 @@ def notes_detail(key):
         raise exceptions.NotFound()
     return note_repr(key)
 
-
-if __name__ == "__main__":
-    app.run(debug=False)
+    
+if __name__ == '__main__':  
+    app.run(debug=True, host='0.0.0.0', port=5000)
