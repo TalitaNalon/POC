@@ -133,3 +133,7 @@ class FlaskAPI(Flask):
                 script_name=self.config["APPLICATION_ROOT"] or "/",
                 url_scheme=self.config["PREFERRED_URL_SCHEME"],
             )
+    
+if __name__ == '__main__':  
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
