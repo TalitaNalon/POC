@@ -37,23 +37,37 @@ jobs:
   deploy:
     needs: tests
     runs-on: ubuntu-20.04
-    if: success() # Este job será executado apenas se o job de testes for bem-sucedido.
+    if: success()  # Este job será executado apenas se o job de testes for bem-sucedido.
+
     steps:
       - uses: actions/checkout@v3
-      
+
+      # Criar o arquivo .pem a partir do secret
+      - name: Create .pem file
+        run: |
+          echo "${{ secrets.AWS_KEY_PEM }}" > Devops.pem
+          chmod 600 Devops.pem  # Corrigido para o nome correto do arquivo
+
       # Deploy para AWS
       - name: Deploy to AWS
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          ssh -i "caminho/para/seu_par_de_chaves.pem" ec2-user@<Elastic_IP> << 'EOF'
-          cd flask-api_methods-develop
-          git pull origin master
-          FLASK_APP=app.py flask run --host=0.0.0.0 --port=5000
+          ssh -o StrictHostKeyChecking=no -i "Devops.pem" ec2-user@<Elastic_IP> << 'EOF'
+          cd /caminho/para/seu/projeto  # Altere para o caminho correto
+          git pull origin master 
+          pipenv install 
+          FLASK_APP=app.py flask run --host=0.0.0.0 --port=5000 &
           EOF
-      
+
       # Deploy para Render
       - name: Deploy to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          curl -X POST https://api.render.com/deploy/srv-xxxxxxxxx -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
+          curl -X POST https://api.render.com/deploy/srv-xxxxxxxxx \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
+
+
+  
